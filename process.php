@@ -13,11 +13,12 @@ $store_id = "aamarpaytest";  // You have to use your Store ID / MerchantID here
 $signature_key="dbb74894e82415a2f7ff0ec3a97e4183"; // Your have to use your signature key here ,it will be provided by aamarPay
 
 $tran_id = "test".rand(1111111,9999999); // Transection id need to be unique for each successful transection.
-
+$url = 'https://sandbox.aamarpay.com/jsonpost.php'; //sandbox
+// $url = 'https://secure.aamarpay.com/jsonpost.php'; //live url
 $curl = curl_init();
 
 curl_setopt_array($curl, array(
-  CURLOPT_URL => 'https://sandbox.aamarpay.com/jsonpost.php',
+  CURLOPT_URL => $url,
   CURLOPT_RETURNTRANSFER => true,
   CURLOPT_ENCODING => '',
   CURLOPT_MAXREDIRS => 10,
