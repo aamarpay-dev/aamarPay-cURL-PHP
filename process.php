@@ -1,6 +1,4 @@
 <?php
-// error_reporting(0); //warning hide
-
 if(!isset($_POST['cus_name'])){
     echo "Direct access restricted";
     exit();
