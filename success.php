@@ -4,8 +4,11 @@ if($_POST['pay_status']=="Successful"){
     
 }
 
+$store_id = "aamarpaytest";  // You have to use your Store ID / MerchantID here
+$signature_key="dbb74894e82415a2f7ff0ec3a97e4183"; // Your have to use your signature key here ,it will be provided by aamarPay
+
 $curl_handle=curl_init();
-curl_setopt($curl_handle,CURLOPT_URL,"https://sandbox.aamarpay.com/api/v1/trxcheck/request.php?request_id=$merTxnId&store_id=&signature_key=&type=json");
+curl_setopt($curl_handle,CURLOPT_URL,"https://sandbox.aamarpay.com/api/v1/trxcheck/request.php?request_id=$merTxnId&store_id=$store_id&signature_key=$signature_key&type=json");
 
 curl_setopt($curl_handle, CURLOPT_VERBOSE, true);
 curl_setopt($curl_handle, CURLOPT_RETURNTRANSFER, true);
@@ -16,10 +19,5 @@ $a = (array)json_decode($buffer);
 echo "<pre>";
 print_r($a);
 echo "</pre>";
-
-$paystatus=$a['pay_status'];
-$mid=$a['mer_txnid'];
-$status=$a['status_code'];
-
 
 ?>

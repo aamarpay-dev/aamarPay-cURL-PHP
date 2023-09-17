@@ -1,76 +1,72 @@
 <?php
-error_reporting(0); //warning hide
+// error_reporting(0); //warning hide
 
-if(!isset($_POST['full_name'])){
+if(!isset($_POST['cus_name'])){
     echo "Direct access restricted";
     exit();
 }
 
-if($_SERVER['REQUEST_METHOD']=="POST" && isset($_POST['submit'])){
-    $fullName=$_POST['full_name'];
-    $email=$_POST['email_add'];
-    $phone_number=$_POST['phone_number'];
-    $university=$_POST['university'];
-   
+$fullName=$_POST['cus_name'];
+$email=$_POST['cus_email'];
+$phone_number=$_POST['cus_phone'];
+$currency=$_POST['currency'];
+$amount=$_POST['amount'];
+$store_id = "aamarpaytest";  // You have to use your Store ID / MerchantID here
+$signature_key="dbb74894e82415a2f7ff0ec3a97e4183"; // Your have to use your signature key here ,it will be provided by aamarPay
+
+$tran_id = "test".rand(1111111,9999999); // Transection id need to be unique for each successful transection.
+
+$curl = curl_init();
+
+curl_setopt_array($curl, array(
+  CURLOPT_URL => 'https://sandbox.aamarpay.com/jsonpost.php',
+  CURLOPT_RETURNTRANSFER => true,
+  CURLOPT_ENCODING => '',
+  CURLOPT_MAXREDIRS => 10,
+  CURLOPT_TIMEOUT => 0,
+  CURLOPT_FOLLOWLOCATION => true,
+  CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+  CURLOPT_CUSTOMREQUEST => 'POST',
+  CURLOPT_POSTFIELDS =>'{
+    "store_id": "'.$store_id.'",
+    "tran_id": "'.$tran_id.'",
+    "success_url": "http://localhost:3000/success.php",
+    "fail_url": "http://localhost:3000/fail.php",
+    "cancel_url": "http://localhost:3000/index.php",
+    "amount": "'.$amount.'",
+    "currency": "'.$currency.'",
+    "signature_key": "'.$signature_key.'",
+    "desc": "Merchant Registration Payment",
+    "cus_name": "'.$fullName.'",
+    "cus_email": "'.$email.'",
+    "cus_add1": "House B-158 Road 22",
+    "cus_add2": "Mohakhali DOHS",
+    "cus_city": "Dhaka",
+    "cus_state": "Dhaka",
+    "cus_postcode": "1206",
+    "cus_country": "Bangladesh",
+    "cus_phone": "'.$phone_number.'",
+    "type": "json"
+}',
+  CURLOPT_HTTPHEADER => array(
+    'Content-Type: application/json'
+  ),
+));
+
+$response = curl_exec($curl);
+
+curl_close($curl);
+
+$responseObj = json_decode($response);
+
+if(isset($responseObj->payment_url) && !empty($responseObj->payment_url)) {
+
+  $paymentUrl = $responseObj->payment_url;
+  return header('Location: '. $paymentUrl);
+  exit();
+    
+}else{
+    echo $response;
 }
-
-
-function rand_string( $length ) {
-	$str="";
-	$chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-	$size = strlen( $chars );
-	for( $i = 0; $i < $length; $i++) { $str .= $chars[ rand( 0, $size - 1 ) ]; }
-	return $str;
-}
-function redirect_to_merchant($url) {
-
-	?>
-    <html xmlns="http://www.w3.org/1999/xhtml">
-      <head><script type="text/javascript">
-        function closethisasap() { document.forms["redirectpost"].submit(); } 
-      </script></head>
-      <body onLoad="closethisasap();">
-      
-        <form name="redirectpost" method="post" action="<?php echo 'https://sandbox.aamarpay.com/'.$url; ?>"></form>
-      </body>
-    </html>
-    <?php	
-    exit;
-} 
-
-$cur_random_value=rand_string(10);
-
-
-$url = 'https://sandbox.aamarpay.com/request.php';
-$fields = array(
-    'store_id' => '', 'amount' => '200', 'payment_type' => 'VISA',
-    'currency' => 'BDT', 'tran_id' => $cur_random_value,
-    'cus_name' => $fullName, 'cus_email' => $email,
-    'cus_add1' => 'Dhaka', 'cus_add2' => 'Mohakhali DOHS',
-    'cus_city' => 'Dhaka', 'cus_state' => 'Dhaka', 'cus_postcode' => '1206',
-    'cus_country' => 'Bangladesh', 'cus_phone' => $phone_number,
-    'cus_fax' => 'Not¬Applicable', 'ship_name' => $fullName,
-    'ship_add1' => 'House B-121, Road 21', 'ship_add2' => 'Mohakhali',
-    'ship_city' => 'Dhaka', 'ship_state' => 'Dhaka',
-    'ship_postcode' => '1212', 'ship_country' => 'Bangladesh',
-    'desc' => $university, 'success_url' => 'http://localhost/edu/success.php',
-    'fail_url' => 'http://localhost/edu/fail.php',
-    'cancel_url' => 'http://localhost/edu/cancel.php',
-    'opt_a' => 'Reshad', 'opt_b' => 'Akil',
-    'opt_c' => 'Liza', 'opt_d' => 'Sohel',
-    'signature_key' => '');
-foreach($fields as $key=>$value) { $fields_string .= $key.'='.$value.'&'; }
-$fields_string = rtrim($fields_string, '&'); 
-$ch = curl_init();
-curl_setopt($ch, CURLOPT_VERBOSE, true);
-curl_setopt($ch, CURLOPT_URL, $url);  
-curl_setopt($ch, CURLOPT_POST, count($fields)); 
-curl_setopt($ch, CURLOPT_POSTFIELDS, $fields_string);
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-$url_forward = str_replace('"', '', stripslashes(curl_exec($ch)));	
-curl_close($ch); 
-
-redirect_to_merchant($url_forward);
 
 ?>
