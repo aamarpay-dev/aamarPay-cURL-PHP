@@ -1,4 +1,5 @@
 <?php
+
 if($_POST['pay_status']=="Successful"){
     $merTxnId= $_POST['mer_txnid'];
     
